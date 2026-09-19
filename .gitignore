@@ -1,0 +1,9 @@
+todo.txt
+test.exe
+build/
+out/
+.vscode/
+*.user
+*.suo
+*.tmp
+*.log

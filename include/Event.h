@@ -1,0 +1,11 @@
+#pragma once
+
+enum class Event
+{
+    BUTTON_PRESSED,
+    BUTTON_RELEASED,
+
+    RECORDING_FINISHED,
+    TRANSCRIPTION_FINISHED,
+    ASSISTANT_FINISHED
+};
