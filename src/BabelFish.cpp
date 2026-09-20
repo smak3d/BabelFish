@@ -1,16 +1,14 @@
-#pragma once
-
 #include "BabelFish.h"
 
 
-BabelFish::BabelFish(State* initialState) 
+BabelFish::BabelFish() 
     : recorder(16000, 1),
       transcriber(16000),
       assistant(),
       recordingState(*this, recorder),
       transcribingState(*this, transcriber),
       assistantState(*this, assistant),
-      currentState(initialState)
+      currentState(&idleState)
 {
     currentState->enter();
 }
@@ -28,7 +26,7 @@ void BabelFish::handleEvent(Event event, bool success)
         {
             case Event::BUTTON_PRESSED:
             case Event::BUTTON_RELEASED:
-                
+            case Event::RECORDING_FINISHED:
                 errorState.setError(Error::RECORDING_ERROR);
                 break;
             case Event::TRANSCRIPTION_FINISHED:
@@ -50,6 +48,8 @@ void BabelFish::handleEvent(Event event, bool success)
             changeState(&recordingState);
             break;
         case Event::BUTTON_RELEASED:
+            break;
+        case Event::RECORDING_FINISHED:
             changeState(&transcribingState);
             break;
         case Event::TRANSCRIPTION_FINISHED:

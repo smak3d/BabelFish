@@ -1,8 +1,9 @@
 #pragma once
 
-#include "BabelFish.h"
 #include "State.h"
-#include "Transcriber.h"
+
+class BabelFish;
+class Transcriber;
 
 class TranscribingState : public State
 {
@@ -15,5 +16,6 @@ class TranscribingState : public State
         void enter() override;
         void update() override;
         void exit() override;
+        void handleEvent(Event event)override;
 
 };

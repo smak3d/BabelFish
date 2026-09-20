@@ -6,7 +6,7 @@ namespace
 {
     whisper_context* context = nullptr;
 
-    const char* modelPath = "external/models/for-tests-ggml-large.bin";
+    const char* modelPath = "C:/models/ggml-large-v3-turbo.bin";
 }
 
 Transcriber::Transcriber(int sampleRate)
@@ -64,7 +64,6 @@ std::string Transcriber::transcribe(const std::vector<int16_t>& audioData)
 
     if (result != 0)
     {
-        whisper_free(context);
         throw std::runtime_error("Failed to run whisper_full");
     }
 
@@ -77,8 +76,6 @@ std::string Transcriber::transcribe(const std::vector<int16_t>& audioData)
         transcription += whisper_full_get_segment_text(context, i);
 
     }
-
-    whisper_free(context);
 
     return transcription;
 }

@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(external/portaudio)
-add_subdirectory(external/whisper.cpp)
 add_subdirectory(external/llama.cpp)
+add_subdirectory(external/whisper.cpp)
 
 add_executable(BabelFish
     src/main.cpp     
@@ -23,6 +23,12 @@ add_executable(BabelFish
     src/states/RecordingState.cpp
     src/states/TranscribingState.cpp
     src/states/AssistantState.cpp
+)
+
+target_include_directories(BabelFish PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/services
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/states
 )
 
 target_link_libraries(BabelFish PRIVATE 

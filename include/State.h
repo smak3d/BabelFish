@@ -10,5 +10,6 @@ class State
         virtual void enter() = 0;
         virtual void update() = 0;
         virtual void exit() = 0;
+        virtual void handleEvent(Event event) = 0;
 
 };

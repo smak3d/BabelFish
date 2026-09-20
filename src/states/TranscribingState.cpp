@@ -1,7 +1,10 @@
 #include "TranscribingState.h"
 #include "Transcriber.h"
+#include "BabelFish.h"
 
 #include <string>
+
+
 
 TranscribingState::TranscribingState(
     BabelFish& app, 
@@ -43,4 +46,8 @@ void TranscribingState::update()
 void TranscribingState::exit()
 {
     // Cleanup logic for transcribing state
+}
+void TranscribingState::handleEvent(Event event)
+{
+    
 }

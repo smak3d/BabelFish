@@ -6,6 +6,7 @@
 
 class Transcriber 
 {
+
     public:
         Transcriber(int sampleRate);
         ~Transcriber();

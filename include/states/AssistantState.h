@@ -1,8 +1,10 @@
 #pragma once
 
-#include "BabelFish.h"
+
 #include "State.h"
-#include "Assistant.h"
+
+class BabelFish;
+class Assistant;
 
 class AssistantState : public State
 {
@@ -16,4 +18,5 @@ public:
     void enter() override;
     void update() override;
     void exit() override;
+    void handleEvent(Event event)override;
 };

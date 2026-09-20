@@ -37,7 +37,7 @@ class BabelFish
         std::string response;
 
     public:
-        BabelFish(State* initialState);
+        BabelFish();
 
         void update();
         void handleEvent(Event event, bool success);

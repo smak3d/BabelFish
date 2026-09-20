@@ -1,8 +1,11 @@
 #pragma once
 
-#include "BabelFish.h"
+
 #include "State.h"
-#include "Recorder.h"
+
+class BabelFish;
+class Recorder;
+
 
 
 class RecordingState : public State
@@ -16,4 +19,5 @@ class RecordingState : public State
         void enter() override;
         void update() override;
         void exit() override;
+        void handleEvent(Event event)override;
 };

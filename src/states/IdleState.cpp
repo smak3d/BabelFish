@@ -14,3 +14,7 @@ void IdleState::exit()
 {
     std::cout << "Starting recording...\n";
 }
+void IdleState::handleEvent(Event event)
+{
+    
+}

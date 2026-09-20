@@ -37,3 +37,9 @@ void ErrorState::setError(Error error)
 {
     this->error = error;
 }
+
+void ErrorState::handleEvent(Event event)
+{
+    
+}
+

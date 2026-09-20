@@ -1,5 +1,7 @@
 #include "RecordingState.h"
 
+#include "BabelFish.h"
+
 RecordingState::RecordingState(
     BabelFish& app,
     Recorder& recorder
@@ -21,8 +23,20 @@ void RecordingState::update()
 
 void RecordingState::exit()
 {
+}
+
+void RecordingState::handleEvent(Event event)
+{
+    if (event != Event::BUTTON_RELEASED)
+        return;
+
     bool success = recorder.stopRecording();
-    if(success)
+
+    if (success)
         app.setAudio(recorder.getAudio());
-    app.handleEvent(Event::RECORDING_FINISHED, success);
+
+    app.handleEvent(
+        Event::RECORDING_FINISHED,
+        success
+    );
 }

@@ -15,6 +15,13 @@ namespace
 Recorder::Recorder(int sampleRate, int channels)
     : sampleRate(sampleRate), channels(channels)
 {
+    PaError result = Pa_Initialize();
+
+    if(result != paNoError)
+    {
+        std::cerr << "PortAudio init error:"
+                  << Pa_GetErrorText(result) << std::endl;
+    }
 }
 
 Recorder::~Recorder()
@@ -25,17 +32,9 @@ Recorder::~Recorder()
 
 void Recorder::startRecording()
 {
-    
     buffer.clear();
 
-    PaError error = Pa_Initialize();
-    if (error!= paNoError)
-    {
-        std::cerr << "PortAudio init error: " << Pa_GetErrorText(error) << std::endl;
-        return;
-    }
-
-    error = Pa_OpenDefaultStream(
+    PaError result = Pa_OpenDefaultStream(
         &stream,
         channels, // Input channels
         0,        // No output channels
@@ -43,23 +42,28 @@ void Recorder::startRecording()
         sampleRate,
         framesPerBuffer,
         nullptr,  // No callback
-        nullptr); // No user data
+        nullptr   // No user data
+    );
 
-    if (error != paNoError)
+    if (result != paNoError)
     {
-        std::cerr << "PortAudio open error: " << Pa_GetErrorText(error) << std::endl;
+        std::cerr << "PortAudio open error: "
+                  << Pa_GetErrorText(result) << std::endl;
+
         stream = nullptr;
-        Pa_Terminate();
         return;
     }
-    error = Pa_StartStream(stream);
 
-    if (error != paNoError)
+    result = Pa_StartStream(stream);
+
+    if (result != paNoError)
     {
-        std::cerr << "PortAudio start error: " << Pa_GetErrorText(error) << std::endl;
+        std::cerr << "PortAudio start error: "
+                  << Pa_GetErrorText(result) << std::endl;
+
         Pa_CloseStream(stream);
         stream = nullptr;
-        Pa_Terminate();
+
         return;
     }
 

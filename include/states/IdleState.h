@@ -8,5 +8,6 @@ class IdleState : public State
         void enter() override;
         void update() override;
         void exit() override;
+        void handleEvent(Event event)override;
 
 };
