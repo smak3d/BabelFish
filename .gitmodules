@@ -1,9 +1,11 @@
-[submodule "external/llama.cpp"]
-	path = external/llama.cpp
-	url = https://github.com/ggml-org/llama.cpp.git
-[submodule "external/portaudio"]
-	path = external/portaudio
-	url = https://github.com/PortAudio/portaudio.git
-[submodule "external/whisper.cpp"]
-	path = external/whisper.cpp
-	url = https://github.com/ggml-org/whisper.cpp.git
+[submodule "client/external/portaudio"]
+    path = client/external/portaudio
+    url = https://github.com/PortAudio/portaudio.git
+
+[submodule "server/external/whisper.cpp"]
+    path = server/external/whisper.cpp
+    url = https://github.com/ggml-org/whisper.cpp.git
+
+[submodule "server/external/llama.cpp"]
+    path = server/external/llama.cpp
+    url = https://github.com/ggml-org/llama.cpp.git

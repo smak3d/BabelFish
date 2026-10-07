@@ -20,7 +20,6 @@ int main()
     {
         BabelFish app;
         
-
         std::cout << "BabelFish is ready.\n"
                      "Press ENTER to start recording..."
                   << std::endl;

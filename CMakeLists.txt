@@ -37,3 +37,9 @@ target_link_libraries(BabelFish PRIVATE
     llama
 )
 
+add_custom_command(TARGET BabelFish POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:portaudio>
+        $<TARGET_FILE_DIR:BabelFish>
+)
+
