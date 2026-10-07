@@ -14,6 +14,11 @@ Transcriber::Transcriber(int sampleRate)
 {
     whisper_context_params contextParams =
     whisper_context_default_params();
+
+    contextParams.use_gpu = true;
+    contextParams.gpu_device = 0;
+    contextParams.flash_attn = true;
+    
     context = whisper_init_from_file_with_params(
         modelPath,
         contextParams
