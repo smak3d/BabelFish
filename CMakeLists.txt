@@ -6,40 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_subdirectory(external/portaudio)
-add_subdirectory(external/llama.cpp)
-add_subdirectory(external/whisper.cpp)
-
-add_executable(BabelFish
-    src/main.cpp     
-    src/BabelFish.cpp
-
-    src/services/Recorder.cpp
-    src/services/Transcriber.cpp
-    src/services/Assistant.cpp
-
-    src/states/ErrorState.cpp
-    src/states/IdleState.cpp
-    src/states/RecordingState.cpp
-    src/states/TranscribingState.cpp
-    src/states/AssistantState.cpp
-)
-
-target_include_directories(BabelFish PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/services
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/states
-)
-
-target_link_libraries(BabelFish PRIVATE 
-    portaudio
-    whisper
-    llama
-)
-
-add_custom_command(TARGET BabelFish POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:portaudio>
-        $<TARGET_FILE_DIR:BabelFish>
-)
-
+add_subdirectory(shared)
+add_subdirectory(client)
+add_subdirectory(server)
