@@ -1,49 +1,71 @@
 #include "ErrorState.h"
+
+#include "BabelFish.h"
+
+#include <chrono>
 #include <iostream>
+#include <thread>
+
+ErrorState::ErrorState(BabelFish& app)
+    : app(app)
+{
+}
 
 void ErrorState::enter()
 {
-        switch (error)
+    switch (error)
     {
         case Error::UNKNOWN_ERROR:
-            std::cout << "Unknown error\n";
+            std::cerr << "[client] unknown error\n";
             break;
 
         case Error::RECORDING_ERROR:
-            std::cout << "Recording error\n";
+            std::cerr << "[client] recording error\n";
             break;
 
         case Error::NETWORK_ERROR:
-            std::cout << "Network error\n";
+            std::cerr << "[client] network error\n";
             break;
 
         case Error::TRANSCRIPTION_ERROR:
-            std::cout << "Transcription error\n";
+            // Причина — от сервера, она лежит в getResponse() и её уже
+            // напечатал WaitingState, здесь только имя ошибки.
+            std::cerr << "[client] transcription error\n";
             break;
 
         case Error::ASSISTANT_ERROR:
-            std::cout << "Assistant error\n";
+            // См. TRANSCRIPTION_ERROR выше.
+            std::cerr << "[client] assistant error\n";
             break;
     }
 }
 
 void ErrorState::update()
 {
-    // Implementation for updating error state
+    // После сетевой ошибки сокет уже закрыт, а переподключение — штатное
+    // восстановление, а не костыль: zmq ставит connect() асинхронно.
+    // Если соединение поставить не вышло (сокетный ад в zmq — на практике
+    // почти недостижимо), крутимся с паузой, как серверный ErrorState
+    // при занятом порту.
+    if (!app.ensureConnected())
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        return;
+    }
+
+    app.goIdle();
 }
 
 void ErrorState::exit()
 {
-    // Implementation for exiting error state
+}
+
+void ErrorState::handleEvent(Event)
+{
+    // События конвейера раздаёт BabelFish::handleEvent — сюда их никто не шлёт.
 }
 
 void ErrorState::setError(Error error)
 {
     this->error = error;
 }
-
-void ErrorState::handleEvent(Event event)
-{
-    
-}
-

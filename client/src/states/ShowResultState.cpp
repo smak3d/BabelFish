@@ -13,20 +13,25 @@ ShowResultState::ShowResultState(
 
 void ShowResultState::enter()
 {
-    std::cout << "Entering Show Result State\n";
+    std::cout << "[client] transcription:\n"
+              << app.getTranscription()
+              << "\n[client] response:\n"
+              << app.getResponse()
+              << std::endl;
 }
 
 void ShowResultState::update()
 {
-    // Implementation for show result state
+    // Показ мгновенный: результат напечатан в enter(), цикл событий
+    // закрывается первым же кадром.
+    app.handleEvent(Event::RESULT_SHOWN, true);
 }
 
 void ShowResultState::exit()
 {
-    // Implementation for exiting show result state
 }
 
-void ShowResultState::handleEvent(Event event)
+void ShowResultState::handleEvent(Event)
 {
-
+    // События конвейера раздаёт BabelFish::handleEvent — сюда их никто не шлёт.
 }
