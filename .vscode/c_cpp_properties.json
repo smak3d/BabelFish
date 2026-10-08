@@ -1,0 +1,45 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "MinGW",
+            "intelliSenseMode": "windows-gcc-x64",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+
+            // Основной источник флагов: те же -I/-D, что и у реальной сборки.
+            // Берётся из корневого CMakeLists.txt (CMAKE_EXPORT_COMPILE_COMMANDS).
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+
+            // Страховка на случай, когда файла ещё нет (свежий clone) или
+            // когда открыт заголовок, который пока не включает ни один .cpp.
+            // Сюда попадает zmq.hpp/zmq.h из build/_deps — они физически
+            // появляются только после конфигурации сборки.
+            "includePath": [
+                "${workspaceFolder}/shared",
+                "${workspaceFolder}/shared/protocol",
+
+                "${workspaceFolder}/client/include",
+                "${workspaceFolder}/client/include/input",
+                "${workspaceFolder}/client/include/services",
+                "${workspaceFolder}/client/include/states",
+                "${workspaceFolder}/client/external/portaudio/include",
+
+                "${workspaceFolder}/server/include",
+                "${workspaceFolder}/server/include/api",
+                "${workspaceFolder}/server/include/services",
+                "${workspaceFolder}/server/include/states",
+
+                "${workspaceFolder}/build/_deps/cppzmq-src",
+                "${workspaceFolder}/build/_deps/libzmq-src/include",
+                "${workspaceFolder}/build/_deps/libzmq-build"
+            ],
+
+            // libzmq собирается статически, без этого zmq.h помечает
+            // символы как dllimport и IntelliSense сыплет ошибками.
+            "defines": [
+                "ZMQ_STATIC"
+            ]
+        }
+    ]
+}

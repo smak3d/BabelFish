@@ -4,7 +4,6 @@ PROJECT_REVIEW.md
 test.exe
 build/
 out/
-.vscode/
 *.user
 *.suo
 *.tmp
