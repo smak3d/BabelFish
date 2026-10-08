@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.20)
 
 project(BabelFishServer)
 
-add_subdirectory(external/whisper.cpp)
 add_subdirectory(external/llama.cpp)
+add_subdirectory(external/whisper.cpp)
 
 add_executable(BabelFishServer
     src/main.cpp
     src/Server.cpp
 
-    src/api/ServerAPI.cpp
+    src/api/ServerApi.cpp
 
     src/services/NetworkServer.cpp
     src/services/Router.cpp

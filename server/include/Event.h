@@ -1,0 +1,9 @@
+#pragma once
+
+enum class Event
+{
+    REQUEST_RECEIVED,
+    RECEIVING_FINISHED,
+    PROCESSING_FINISHED,
+    RESPONSE_SENT
+};

@@ -1,4 +1,4 @@
-#include "Assistant.h"
+#include "LocalAssistant.h"
 
 #include <llama.h>
 
@@ -15,7 +15,7 @@ namespace
     const char* modelPath= "C:/models/Qwen3-4B-Q6_K.gguf";
 }
 
-Assistant::Assistant()
+LocalAssistant::LocalAssistant()
 {
     llama_backend_init();
     llama_model_params modelParams = llama_model_default_params();
@@ -47,7 +47,7 @@ Assistant::Assistant()
     }
 }
 
-Assistant::~Assistant()
+LocalAssistant::~LocalAssistant()
 {
     if (context)
     {
@@ -64,7 +64,7 @@ Assistant::~Assistant()
     llama_backend_free();
 }
 
-std::string Assistant::prompt(const std::string& text)
+std::string LocalAssistant::prompt(const std::string& text)
 {
     if (!model || !context)
     {

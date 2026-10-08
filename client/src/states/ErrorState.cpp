@@ -13,6 +13,10 @@ void ErrorState::enter()
             std::cout << "Recording error\n";
             break;
 
+        case Error::NETWORK_ERROR:
+            std::cout << "Network error\n";
+            break;
+
         case Error::TRANSCRIPTION_ERROR:
             std::cout << "Transcription error\n";
             break;

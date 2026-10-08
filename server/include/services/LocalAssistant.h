@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-class Assistant
+class LocalAssistant
 {
 
     public:
-        Assistant();
-        ~Assistant();
+        LocalAssistant();
+        ~LocalAssistant();
 
         std::string prompt(const std::string& text);
 

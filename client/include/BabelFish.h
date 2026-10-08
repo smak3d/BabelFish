@@ -4,14 +4,13 @@
 #include "Event.h"
 
 #include "Recorder.h"
-#include "Transcriber.h"
-#include "Assistant.h"
 
 #include "ErrorState.h"
 #include "IdleState.h"
 #include "RecordingState.h"
-#include "TranscribingState.h"
-#include "AssistantState.h"
+#include "SendingState.h"
+#include "WaitingState.h"
+#include "ShowResultState.h"
 
 #include <vector>
 #include <cstdint>
@@ -23,14 +22,13 @@ class BabelFish
         State* currentState;
 
         Recorder recorder;
-        Transcriber transcriber;
-        Assistant assistant;
 
         ErrorState errorState;
         IdleState idleState;
         RecordingState recordingState;
-        TranscribingState transcribingState;
-        AssistantState assistantState;
+        SendingState sendingState;
+        WaitingState waitingState;
+        ShowResultState showResultState;
 
         std::vector<int16_t> audio;
         std::string transcription;

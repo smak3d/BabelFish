@@ -3,11 +3,10 @@
 
 BabelFish::BabelFish() 
     : recorder(16000, 1),
-      transcriber(16000),
-      assistant(),
       recordingState(*this, recorder),
-      transcribingState(*this, transcriber),
-      assistantState(*this, assistant),
+      sendingState(*this),
+      waitingState(*this),
+      showResultState(*this),
       currentState(&idleState)
 {
     currentState->enter();
@@ -29,13 +28,12 @@ void BabelFish::handleEvent(Event event, bool success)
             case Event::RECORDING_FINISHED:
                 errorState.setError(Error::RECORDING_ERROR);
                 break;
-            case Event::TRANSCRIPTION_FINISHED:
-            
-                errorState.setError(Error::TRANSCRIPTION_ERROR);
+            case Event::SENDING_FINISHED:
+            case Event::RESPONSE_RECEIVED:
+                errorState.setError(Error::NETWORK_ERROR);
                 break;
-            case Event::ASSISTANT_FINISHED:
-                
-                errorState.setError(Error::ASSISTANT_ERROR);
+            case Event::RESULT_SHOWN:
+                errorState.setError(Error::UNKNOWN_ERROR);
                 break;
         }
         changeState(&errorState);
@@ -50,12 +48,15 @@ void BabelFish::handleEvent(Event event, bool success)
         case Event::BUTTON_RELEASED:
             break;
         case Event::RECORDING_FINISHED:
-            changeState(&transcribingState);
+            changeState(&sendingState);
             break;
-        case Event::TRANSCRIPTION_FINISHED:
-            changeState(&assistantState);
+        case Event::SENDING_FINISHED:
+            changeState(&waitingState);
             break;
-        case Event::ASSISTANT_FINISHED:
+        case Event::RESPONSE_RECEIVED:
+            changeState(&showResultState);
+            break;
+        case Event::RESULT_SHOWN:
             changeState(&idleState);
             break;
     }
