@@ -9,7 +9,7 @@ add_executable(BabelFishServer
     src/main.cpp
     src/Server.cpp
 
-    src/api/ServerApi.cpp
+    src/api/ServerAPI.cpp
 
     src/services/NetworkServer.cpp
     src/services/Router.cpp

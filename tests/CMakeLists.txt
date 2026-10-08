@@ -58,6 +58,52 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(InputPackaging PRIVATE -Wall -Wextra)
 endif()
 
+# П.4 (серверный конвейер): Server целиком — состояния, диспетчер
+# ServerAPI, настоящие сокеты. Модели НЕ грузятся: быстрые фазы проверяют
+# приём/сборку/диспетчер/ответ, полный проход через Transcriber и
+# LocalAssistant запускается вручную: PipelineFlow --with-models
+# (иначе каждый ctest ждал бы загрузки моделей в полтора и три гигабайта).
+#
+# Собирается только там, где уже подключены whisper и llama из
+# server/external — то есть в корневой конфигурации; отдельная
+# конфигурация tests/ эти библиотеки не тянет.
+if (TARGET whisper AND TARGET llama)
+    add_executable(PipelineFlow
+        PipelineFlow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/Server.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/api/ServerAPI.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/states/IdleState.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/states/ReceivingState.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/states/ProcessingState.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/states/SendingState.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/states/ErrorState.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/NetworkServer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/Transcriber.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/LocalAssistant.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../client/src/services/NetworkClient.cpp
+    )
+
+    target_include_directories(PipelineFlow PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/api
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/services
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/states
+        ${CMAKE_CURRENT_SOURCE_DIR}/../client/include/services
+    )
+
+    target_link_libraries(PipelineFlow PRIVATE
+        BabelFishShared
+        whisper
+        llama
+    )
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(PipelineFlow PRIVATE -Wall -Wextra)
+    endif()
+
+    add_test(NAME PipelineFlow COMMAND PipelineFlow)
+endif()
+
 enable_testing()
 add_test(NAME ProtocolRoundTrip COMMAND ProtocolRoundTrip)
 add_test(NAME TransportEcho COMMAND TransportEcho)
