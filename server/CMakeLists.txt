@@ -29,12 +29,12 @@ target_include_directories(BabelFishServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/api
     ${CMAKE_CURRENT_SOURCE_DIR}/include/services
     ${CMAKE_CURRENT_SOURCE_DIR}/include/states
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/protocol
 )
 
+# BabelFishShared отдаёт include-пути shared/ и shared/protocol, заголовки
+# zmq.hpp и саму libzmq — по ним и живёт NetworkServer.
 target_link_libraries(BabelFishServer PRIVATE
     whisper
     llama
+    BabelFishShared
 )

@@ -19,5 +19,25 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ProtocolRoundTrip PRIVATE -Wall -Wextra)
 endif()
 
+# Транспорт (шаг 2) живёт в client/ и server/, но тест собирает его напрямую:
+# так проверяется именно сеть, без main.cpp, Recorder, whisper и llama.
+add_executable(TransportEcho
+    TransportEcho.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../client/src/services/NetworkClient.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/NetworkServer.cpp
+)
+
+target_include_directories(TransportEcho PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../client/include/services
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/services
+)
+
+target_link_libraries(TransportEcho PRIVATE BabelFishShared)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(TransportEcho PRIVATE -Wall -Wextra)
+endif()
+
 enable_testing()
 add_test(NAME ProtocolRoundTrip COMMAND ProtocolRoundTrip)
+add_test(NAME TransportEcho COMMAND TransportEcho)

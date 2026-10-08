@@ -29,13 +29,13 @@ target_include_directories(BabelFishClient PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/input
     ${CMAKE_CURRENT_SOURCE_DIR}/include/services
     ${CMAKE_CURRENT_SOURCE_DIR}/include/states
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/protocol
 )
 
+# BabelFishShared отдаёт include-пути shared/ и shared/protocol, заголовки
+# zmq.hpp и саму libzmq — по ним и живёт NetworkClient.
 target_link_libraries(BabelFishClient PRIVATE
     portaudio
+    BabelFishShared
 )
 
 add_custom_command(TARGET BabelFishClient POST_BUILD

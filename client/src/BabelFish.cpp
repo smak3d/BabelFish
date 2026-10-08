@@ -19,6 +19,13 @@ void BabelFish::update()
 
 void BabelFish::handleEvent(Event event, bool success)
 {
+    // Сетевые события успешного исхода не имеют: таймаут и обрыв — это
+    // всегда ошибка сети, каким бы success их ни прислал вызывающий.
+    if (event == Event::NETWORK_TIMEOUT || event == Event::CONNECTION_LOST)
+    {
+        success = false;
+    }
+
     if(!success)
     {
         switch(event)
@@ -30,6 +37,8 @@ void BabelFish::handleEvent(Event event, bool success)
                 break;
             case Event::SENDING_FINISHED:
             case Event::RESPONSE_RECEIVED:
+            case Event::NETWORK_TIMEOUT:
+            case Event::CONNECTION_LOST:
                 errorState.setError(Error::NETWORK_ERROR);
                 break;
             case Event::RESULT_SHOWN:
@@ -58,6 +67,11 @@ void BabelFish::handleEvent(Event event, bool success)
             break;
         case Event::RESULT_SHOWN:
             changeState(&idleState);
+            break;
+        case Event::NETWORK_TIMEOUT:
+        case Event::CONNECTION_LOST:
+            // Недостижимо: выше success для этих событий принудительно false.
+            // Ветка нужна, чтобы switch по перечислению был полным.
             break;
     }
     
