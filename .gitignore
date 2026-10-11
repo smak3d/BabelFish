@@ -3,6 +3,7 @@ struct.txt
 PROJECT_REVIEW.md
 test.exe
 build/
+build-cuda/
 out/
 *.user
 *.suo

@@ -3,29 +3,34 @@
 #include <llama.h>
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <iterator>
 
-namespace
-{
-    llama_model* model = nullptr;
-    llama_context* context = nullptr;
-
-    const char* modelPath= "C:/models/Qwen3-4B-Q6_K.gguf";
-}
-
-LocalAssistant::LocalAssistant()
+LocalAssistant::LocalAssistant(std::string modelPath, int device, int gpuLayers)
+    : modelPath(std::move(modelPath)), device(device), gpuLayers(gpuLayers)
 {
     llama_backend_init();
     llama_model_params modelParams = llama_model_default_params();
 
-    model = llama_load_model_from_file(modelPath, modelParams);
+    // На GPU уезжает ровно n_gpu_layers слоёв; остальные считаются в RAM.
+    // split_mode NONE — модель целиком на main_gpu, а не размазана по всем
+    // картам: так каждая модель привязана к своему устройству явно.
+    modelParams.n_gpu_layers = (device >= 0) ? gpuLayers : 0;
+    modelParams.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    modelParams.main_gpu     = (device >= 0) ? device : 0;
+
+    model = llama_model_load_from_file(
+        this->modelPath.c_str(),
+        modelParams
+    );
 
 
     if (!model)
     {
-        throw std::runtime_error("Failed to load model");
+        throw std::runtime_error(
+            "Failed to load model: " + this->modelPath);
     }
 
     llama_context_params contextParams =
@@ -40,7 +45,7 @@ LocalAssistant::LocalAssistant()
 
     if (!context)
     {
-        llama_free_model(model);
+        llama_model_free(model);
         model = nullptr;
 
         throw std::runtime_error("Failed to create context");
@@ -57,11 +62,16 @@ LocalAssistant::~LocalAssistant()
 
     if (model)
     {
-        llama_free_model(model);
+        llama_model_free(model);
         model = nullptr;
     }
-    
+
     llama_backend_free();
+}
+
+const std::string& LocalAssistant::getPath() const
+{
+    return modelPath;
 }
 
 std::string LocalAssistant::prompt(const std::string& text)

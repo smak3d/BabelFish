@@ -1,10 +1,37 @@
 #include "Server.h"
 
+#include <chrono>
 #include <iostream>
+#include <string>
 #include <utility>
 
-Server::Server(std::string endpoint)
+namespace
+{
+    std::string deviceName(int device)
+    {
+        return device >= 0 ? "gpu " + std::to_string(device) : "cpu";
+    }
+
+    // Загрузка модели с замером времени: на больших моделях это десятки
+    // секунд, и в логе должно быть видно, что именно и сколько грузилось.
+    // std::endl не просто так: stdout сервера часто заворачивают в файл,
+    // а при буферизации вывод теряется при любом сбое.
+    void logModel(const char* what, const std::string& path, int device,
+                  std::chrono::steady_clock::time_point started)
+    {
+        const auto seconds =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - started).count() / 1000.0;
+
+        std::cout << "[server] " << what << ": " << path
+                  << " on " << deviceName(device)
+                  << " (" << seconds << " s)" << std::endl;
+    }
+}
+
+Server::Server(std::string endpoint, ModelSettings settings)
     : endpoint(std::move(endpoint)),
+      settings(std::move(settings)),
       errorState(*this),
       idleState(*this),
       receivingState(*this),
@@ -134,7 +161,7 @@ bool Server::ensureListening()
         return false;
     }
 
-    std::cout << "[server] listening on " << endpoint << "\n";
+    std::cout << "[server] listening on " << endpoint << std::endl;
     return true;
 }
 
@@ -176,7 +203,12 @@ NetworkServer& Server::getNetwork()
 Transcriber& Server::getTranscriber()
 {
     if (!transcriber)
-        transcriber = std::make_unique<Transcriber>(sampleRate);
+    {
+        transcriber = std::make_unique<Transcriber>(
+            sampleRate,
+            settings.transcriberModel,
+            settings.transcriberDevice);
+    }
 
     return *transcriber;
 }
@@ -184,9 +216,30 @@ Transcriber& Server::getTranscriber()
 LocalAssistant& Server::getAssistant()
 {
     if (!assistant)
-        assistant = std::make_unique<LocalAssistant>();
+    {
+        assistant = std::make_unique<LocalAssistant>(
+            settings.assistantModel,
+            settings.assistantDevice,
+            settings.assistantLayers);
+    }
 
     return *assistant;
+}
+
+void Server::preloadModels()
+{
+    // Грузим обе сразу: на большом железе это десятки секунд, и бросать
+    // их в первый запрос — значит заставить клиента ждать. Порядок
+    // как в get*: сначала транскрибер, потом ассистент.
+    auto started = std::chrono::steady_clock::now();
+    getTranscriber();
+    logModel("transcriber", settings.transcriberModel,
+             settings.transcriberDevice, started);
+
+    started = std::chrono::steady_clock::now();
+    getAssistant();
+    logModel("assistant", settings.assistantModel,
+             settings.assistantDevice, started);
 }
 
 protocol::Request& Server::getRequest()

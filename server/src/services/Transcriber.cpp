@@ -1,34 +1,32 @@
 #include "Transcriber.h"
 #include "whisper.h"
+
 #include <stdexcept>
+#include <utility>
 
-namespace
-{
-    whisper_context* context = nullptr;
-
-    const char* modelPath = "C:/models/ggml-large-v3-turbo.bin";
-}
-
-Transcriber::Transcriber(int sampleRate)
-    : sampleRate(sampleRate)
+Transcriber::Transcriber(int sampleRate, std::string modelPath, int device)
+    : sampleRate(sampleRate), modelPath(std::move(modelPath))
 {
     whisper_context_params contextParams =
-    whisper_context_default_params();
+        whisper_context_default_params();
 
-    contextParams.use_gpu = true;
-    contextParams.gpu_device = 0;
-    contextParams.flash_attn = true;
-    
+    // device < 0 — CPU: use_gpu гасит GPU-бэкенд целиком, gpu_device в
+    // этом случае не читается (выставляем 0 просто чтобы не держать
+    // мусорный индекс).
+    contextParams.use_gpu    = (device >= 0);
+    contextParams.gpu_device = (device >= 0) ? device : 0;
+    contextParams.flash_attn = (device >= 0);
+
     context = whisper_init_from_file_with_params(
-        modelPath,
+        this->modelPath.c_str(),
         contextParams
     );
-        
+
     if (!context)
     {
-        throw std::runtime_error("Failed to initialize whisper model");
+        throw std::runtime_error(
+            "Failed to initialize whisper model: " + this->modelPath);
     }
-    
 }
 
 Transcriber::~Transcriber()
@@ -38,6 +36,11 @@ Transcriber::~Transcriber()
         whisper_free(context);
         context = nullptr;
     }
+}
+
+const std::string& Transcriber::getPath() const
+{
+    return modelPath;
 }
 
 std::string Transcriber::transcribe(const std::vector<int16_t>& audioData)
@@ -61,9 +64,9 @@ std::string Transcriber::transcribe(const std::vector<int16_t>& audioData)
 
     // Run the transcription
     int result = whisper_full(
-        context, 
-        params, 
-        audioFloat.data(), 
+        context,
+        params,
+        audioFloat.data(),
         audioFloat.size()
     );
 

@@ -2,6 +2,19 @@ cmake_minimum_required(VERSION 3.20)
 
 project(BabelFishServer)
 
+# GPU-бэкенд моделей: включается опцией -DBABELFISH_WITH_CUDA=ON и работает
+# только под MSVC — nvcc на Windows не принимает MinGW-g++ в качестве
+# хост-компилятора. Поэтому у сервера появляется второе дерево сборки
+# (build-cuda/), остальная часть проекта от этого не зависит.
+option(BABELFISH_WITH_CUDA
+       "Собирать whisper.cpp и llama.cpp с CUDA-бэкендом" OFF)
+
+if (BABELFISH_WITH_CUDA)
+    # Опция назначения и llama.cpp, и whisper.cpp (у whisper старое имя
+    # WHISPER_CUDA теперь просто превращается в неё с предупреждением).
+    set(GGML_CUDA ON CACHE BOOL "" FORCE)
+endif()
+
 add_subdirectory(external/llama.cpp)
 add_subdirectory(external/whisper.cpp)
 

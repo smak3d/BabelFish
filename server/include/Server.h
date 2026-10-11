@@ -5,6 +5,7 @@
 #include "Error.h"
 
 #include "ServerAPI.h"
+#include "ModelSettings.h"
 #include "NetworkServer.h"
 #include "Transcriber.h"
 #include "LocalAssistant.h"
@@ -57,7 +58,18 @@ class Server
         // endpoint — куда слушать: "tcp://*:5555" в работе,
         // "tcp://127.0.0.1:<port>" в тестах (общедоступный bind тестам
         // не нужен, он дёргал бы брандмауэр).
-        Server(std::string endpoint);
+        //
+        // settings — где модели и на каких устройствах они живут.
+        // Модели НЕ грузятся в конструкторе: по умолчанию они догружаются
+        // лениво по первому запросу (так живёт PipelineFlow — тест проверяет
+        // конвейер без моделей), а main зовёт preloadModels(), чтобы
+        // грузить их при старте.
+        Server(std::string endpoint, ModelSettings settings = ModelSettings{});
+
+        // Загрузка обеих моделей сразу, с логом времени. Бросает
+        // исключение при любой проблеме — main печатает её и выходит,
+        // чтобы сервер не слушал порт с нерабочими моделями.
+        void preloadModels();
 
         void update();
         void run(); // главный цикл, не возвращается
@@ -80,8 +92,9 @@ class Server
 
         NetworkServer& getNetwork();
 
-        // Ленивая загрузка моделей: см. поле transcriber внизу.
-        // Бросают исключение, если файла модели нет — ProcessingState
+        // Подставляются в конструкторе при старте сервера, иначе
+        // догружаются лениво (см. поле transcriber внизу). Бросают
+        // исключение, если файла модели нет — ProcessingState
         // превращает его в Response(TranscriptionError/AssistantError).
         Transcriber& getTranscriber();
         LocalAssistant& getAssistant();
@@ -100,13 +113,13 @@ class Server
 
     private:
         std::string endpoint;
+        ModelSettings settings;
 
         NetworkServer network;
         ServerAPI api;
 
-        // Лениво: модели весят полтора и три гигабайта — грузить их в
-        // конструкторе значит не подниматься вовсе на машине без моделей.
-        // Первый же запрос, которому нужна модель, догрузит её; если
+        // Ленивая загрузка: создаются по первому запросу, которому нужна
+        // модель (см. preloadModels() — main грузит их заранее). Если
         // файла нет — исключение уймёт ProcessingState в Response.
         std::unique_ptr<Transcriber> transcriber;
         std::unique_ptr<LocalAssistant> assistant;
