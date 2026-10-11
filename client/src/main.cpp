@@ -73,7 +73,9 @@ int main(int argc, char* argv[])
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 
-    std::string host = "127.0.0.1";
+    std::string host = "127.0.0.1"; // адрес для локальных проверок 
+    
+
     std::uint16_t port = defaultPort;
     InputMode mode = InputMode::Microphone;
 
