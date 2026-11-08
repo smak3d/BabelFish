@@ -23,7 +23,10 @@ class LocalAssistant
         LocalAssistant(const LocalAssistant&) = delete;
         LocalAssistant& operator=(const LocalAssistant&) = delete;
 
-        std::string prompt(const std::string& text);
+        // Транспорт LLM: system-инструкция + текст. Инструкции —
+        // владение вызывающего (исполнителя), здесь только отправка.
+        std::string prompt(const std::string& systemPrompt,
+                           const std::string& text);
 
         const std::string& getPath() const;
 

@@ -3,14 +3,13 @@
 class Server;
 
 // Диспетчер между ReceivingState и ProcessingState: место, где принятый
-// запрос превращается в план обработки. Цепочка из todo п.4:
+// запрос превращается в план обработки. Цепочка из todo:
 //
-//     ReceivingState -> Router/ServerAPI (диспетчер) -> ProcessingState
+//     ReceivingState -> ServerAPI::dispatch -> ProcessingState -> Router
 //
-// На первом проходе (п.4) он пишется в обход Router: маршрутов ровно
-// один — местный конвейер Transcriber -> LocalAssistant. Router (п.6)
-// навяжется здесь же и добавит выбор net-ассистента (JEV/LAYA), не меняя
-// ни состояний, ни контракт.
+// Диспетчер только решает, берёмся ли мы за запрос (Process/Reject).
+// Выбор исполнителя — Router (п.8): он живёт в ProcessingState после
+// склейки аудио/текста и тоже не меняет ни состояний, ни контракт.
 class ServerAPI
 {
     public:

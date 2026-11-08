@@ -74,7 +74,8 @@ const std::string& LocalAssistant::getPath() const
     return modelPath;
 }
 
-std::string LocalAssistant::prompt(const std::string& text)
+std::string LocalAssistant::prompt(const std::string& systemPrompt,
+                                   const std::string& text)
 {
     if (!model || !context)
     {
@@ -84,13 +85,9 @@ std::string LocalAssistant::prompt(const std::string& text)
     }
 
 
-const std::string systemMessage =
-    "Ты полезный голосовой ассистент. "
-    "Отвечай кратко, точно и по существу на русском языке.";
-
 const llama_chat_message messages[] = {
-    { "system", systemMessage.c_str() },
-    { "user",   text.c_str()          },
+    { "system", systemPrompt.c_str() },
+    { "user",   text.c_str()         },
 };
 
 const char* chatTemplate = llama_model_chat_template(model, nullptr);

@@ -1,0 +1,149 @@
+﻿1 - файл есть не допилен
+2 - фаил допилен первично(написан - непроверен)
+3 - файл допилен (както работает)
+4 - файл готов
+
+C:\projects\BabelFish
+│
+│   .gitignore
+│   .gitmodules
+│   todo.txt
+│   struct.txt
+│
+├── client
+│   │
+│   ├── CMakeLists.txt 3
+│   ├── README.md 1
+│   │
+│   ├── external
+│   │   └── portaudio 1
+│   │
+│   ├── include
+│   │   ├── BabelFish.h 3
+│   │   ├── Error.h 1
+│   │   ├── Event.h 3
+│   │   ├── State.h 1
+│   │   │
+│   │   ├── input
+│   │   │   ├── Input.h 3
+│   │   │   ├── MicrophoneInput.h 3
+│   │   │   └── KeyboardInput.h 3
+│   │   │
+│   │   ├── services
+│   │   │   ├── Recorder.h 4
+│   │   │   ├── RequestBuilder.h 3
+│   │   │   └── NetworkClient.h 3
+│   │   │
+│   │   └── states
+│   │       ├── IdleState.h 3
+│   │       ├── InputState.h 3
+│   │       ├── SendingState.h 3
+│   │       ├── RecordingState.h 3
+│   │       ├── WaitingState.h 3
+│   │       ├── ShowResultState.h 3
+│   │       └── ErrorState.h 3
+│   │
+│   └── src
+│       ├── BabelFish.cpp 3
+│       ├── main.cpp 3
+│       │
+│       ├── input
+│       │   ├── MicrophoneInput.cpp 3
+│       │   └── KeyboardInput.cpp 3
+│       │
+│       ├── services
+│       │   ├── Recorder.cpp 4
+│       │   ├── RequestBuilder.cpp 3
+│       │   └── NetworkClient.cpp 3
+│       │
+│       └── states
+│           ├── IdleState.cpp 3
+│           ├── InputState.cpp 3
+│           ├── SendingState.cpp 3
+│           ├── RecordingState.cpp 3
+│           ├── WaitingState.cpp 3
+│           ├── ShowResultState.cpp 3
+│           └── ErrorState.cpp 3
+│
+├── server
+│   │
+│   ├── CMakeLists.txt 3
+│   ├── README.md 1
+│   │
+│   ├── external
+│   │   ├── whisper.cpp 1
+│   │   ├── llama.cpp 1
+│   │   └── decision-engine(for router JEV / LAYA) 1
+|   |       |
+|   |       └── пока под вопросом что здесь будет
+│   │
+│   ├── include
+│   │   ├── Server.h 3
+│   │   ├── Error.h 1
+│   │   ├── Event.h 1
+│   │   ├── State.h 1
+│   │   │
+│   │   ├── api
+│   │   │   └── ServerAPI.h 3
+│   │   │
+│   │   ├── executors
+│   │   │   ├── Executor.h 4
+│   │   │   └── Executors.h 4
+│   │   │
+│   │   ├── services
+│   │   │   ├── NetworkServer.h 3
+│   │   │   ├── Router.h 4
+│   │   │   ├── RouterRules.h 4
+│   │   │   ├── Transcriber.h 1
+│   │   │   ├── LocalAssistant.h 1
+│   │   │   └── NetAssistant.h 1
+│   │   │
+│   │   └── states
+│   │       ├── IdleState.h 3
+│   │       ├── ReceivingState.h 3
+│   │       ├── ProcessingState.h 3
+│   │       ├── SendingState.h 3
+│   │       └── ErrorState.h 3
+│   │
+│   └── src
+│       ├── Server.cpp 3
+│       ├── main.cpp 3
+│       │
+│       ├── api
+│       │   └── ServerAPI.cpp 3
+│       │
+│       ├── executors
+│       │   └── Executors.cpp 4
+│       │
+│       ├── services
+│       │   ├── NetworkServer.cpp 3
+│       │   ├── Router.cpp 4
+│       │   ├── Transcriber.cpp 1
+│       │   ├── LocalAssistant.cpp 1
+│       │   └── NetAssistant.cpp 1
+│       │
+│       └── states
+│           ├── IdleState.cpp 3
+│           ├── ReceivingState.cpp 3
+│           ├── ProcessingState.cpp 3
+│           ├── SendingState.cpp 3
+│           └── ErrorState.cpp 3
+│
+├── shared
+│   ├── CMakeLists.txt 3
+│   ├── NetworkError.h 3
+│   │
+│   └── protocol
+│       ├── Request.h 3
+│       ├── Response.h 3
+│       ├── MessageType.h 3
+│       └── AudioFormat.h 3
+│
+└── tests
+    ├── CMakeLists.txt 3
+    ├── ProtocolRoundTrip.cpp 3
+    ├── TransportEcho.cpp 3
+    ├── InputPackaging.cpp 3
+    ├── PipelineFlow.cpp 3
+    ├── RouterClassify.cpp 4
+    └── ExecutorChain.cpp 4

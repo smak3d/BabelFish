@@ -1,5 +1,4 @@
 todo.txt
-struct.txt
 PROJECT_REVIEW.md
 test.exe
 build/
@@ -10,3 +9,7 @@ out/
 *.tmp
 *.log
 *.VSCodeCounter
+
+# clangd - local machine config (компилируется только на этой машине)
+.clangd
+compile_commands.json

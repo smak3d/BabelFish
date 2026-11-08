@@ -30,6 +30,8 @@ add_executable(BabelFishServer
     src/services/LocalAssistant.cpp
     src/services/NetAssistant.cpp
 
+    src/executors/Executors.cpp
+
     src/states/IdleState.cpp
     src/states/ReceivingState.cpp
     src/states/ProcessingState.cpp

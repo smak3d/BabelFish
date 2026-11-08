@@ -58,6 +58,39 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(InputPackaging PRIVATE -Wall -Wextra)
 endif()
 
+# П.8 (роутер): classify/executorFor — чистые функции, без моделей и
+# без сети: Router.cpp компилируется напрямую (тот же приём, что у
+# TransportEcho с NetworkServer).
+add_executable(RouterClassify
+    RouterClassify.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/Router.cpp
+)
+
+target_include_directories(RouterClassify PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/services
+)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(RouterClassify PRIVATE -Wall -Wextra)
+endif()
+
+# П.8 (связка): исполнители с PromptFn-заглушкой — без моделей и без
+# сети проверяется, какой именно запрос уходит в LLM.
+add_executable(ExecutorChain
+    ExecutorChain.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/executors/Executors.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/Router.cpp
+)
+
+target_include_directories(ExecutorChain PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../server/include/services
+)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(ExecutorChain PRIVATE -Wall -Wextra)
+endif()
+
 # П.4 (серверный конвейер): Server целиком — состояния, диспетчер
 # ServerAPI, настоящие сокеты. Модели НЕ грузятся: быстрые фазы проверяют
 # приём/сборку/диспетчер/ответ, полный проход через Transcriber и
@@ -80,6 +113,8 @@ if (TARGET whisper AND TARGET llama)
         ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/NetworkServer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/Transcriber.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/LocalAssistant.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/services/Router.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../server/src/executors/Executors.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../client/src/services/NetworkClient.cpp
     )
 
@@ -108,3 +143,5 @@ enable_testing()
 add_test(NAME ProtocolRoundTrip COMMAND ProtocolRoundTrip)
 add_test(NAME TransportEcho COMMAND TransportEcho)
 add_test(NAME InputPackaging COMMAND InputPackaging)
+add_test(NAME RouterClassify COMMAND RouterClassify)
+add_test(NAME ExecutorChain COMMAND ExecutorChain)

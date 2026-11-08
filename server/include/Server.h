@@ -9,6 +9,9 @@
 #include "NetworkServer.h"
 #include "Transcriber.h"
 #include "LocalAssistant.h"
+#include "Router.h"
+#include "executors/Executor.h"
+#include "executors/Executors.h"
 
 #include "ErrorState.h"
 #include "IdleState.h"
@@ -31,7 +34,7 @@
 //         --REQUEST_RECEIVED-->
 //     ReceivingState   разбирает принятый Request, собирает аудио/текст
 //         --RECEIVING_FINISHED-->   диспетчер ServerAPI::dispatch
-//     ProcessingState  Transcriber -> LocalAssistant
+//     ProcessingState  Transcriber/текст -> Router -> Executor -> LLM
 //         --PROCESSING_FINISHED-->
 //     SendingState     Response клиенту
 //         --RESPONSE_SENT--> снова IdleState
@@ -99,6 +102,13 @@ class Server
         Transcriber& getTranscriber();
         LocalAssistant& getAssistant();
 
+        // Исполнитель по решению роутера (п.8): None/LocalAssistant —
+        // вопрос дефолтному ассистенту, Translator — перевод, // RemoteTranslator — заглушка до NetAssistant. PromptFn уходит
+        // в исполнители отсюда, поэтому ленивая загрузка модели
+        // сохраняется: модель грузится в первый execute(), а не
+        // в конструкторе.
+        Executor& getExecutor(Router::Executor kind);
+
         protocol::Request& getRequest();
         void setRequest(const protocol::Request& request);
 
@@ -123,6 +133,14 @@ class Server
         // файла нет — исключение уймёт ProcessingState в Response.
         std::unique_ptr<Transcriber> transcriber;
         std::unique_ptr<LocalAssistant> assistant;
+
+        // Исполнители (п.8): promptFn — транспорт к ленивой LLM,
+        // объекты создаются в конструкторе, но модель грузят только
+        // при вызове (см. getExecutor выше).
+        PromptFn promptFn;
+        LocalAssistantExecutor localExecutor;
+        TranslatorExecutor translatorExecutor;
+        RemoteTranslatorExecutor remoteExecutor;
 
         ErrorState errorState;
         IdleState idleState;

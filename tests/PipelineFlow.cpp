@@ -209,10 +209,11 @@ static void testRecovery(NetworkClient& client, Server& server)
 // Transcriber и LocalAssistant.
 // ---------------------------------------------------------------------------
 
-// Полный проход: текст (п.3 умеет TextRequest) сразу идёт ассистенту.
+// Полный проход: текст (п.3 умеет TextRequest) идёт через Router (п.8)
+// и исполнителя в локальную LLM.
 static void testTextProcessing(NetworkClient& client, Server& server)
 {
-    step("обработка: TextRequest -> LocalAssistant -> ответ клиенту");
+    step("обработка: TextRequest -> Router -> Executor -> ответ клиенту");
 
     const std::string question = "Чем отличается REQ от REP?";
 

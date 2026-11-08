@@ -32,6 +32,15 @@ namespace
 Server::Server(std::string endpoint, ModelSettings settings)
     : endpoint(std::move(endpoint)),
       settings(std::move(settings)),
+      promptFn([this](const std::string& system, const std::string& text)
+               {
+                   // Ленивая модель: getAssistant() грузит её при первом
+                   // же вызове, здесь только проброска.
+                   return getAssistant().prompt(system, text);
+               }),
+      localExecutor(promptFn),
+      translatorExecutor(promptFn),
+      remoteExecutor(),
       errorState(*this),
       idleState(*this),
       receivingState(*this),
@@ -96,10 +105,9 @@ void Server::handleEvent(Event event, bool success)
             break;
 
         case Event::RECEIVING_FINISHED:
-            // В обход Router (п.4): маршрутов пока один — диспетчер
-            // решает, берёмся ли мы вообще за этот запрос. Router (п.6)
-            // навяжется сюда же и добавит выбор net-ассистента, не меняя
-            // ни состояний, ни контракт.
+            // Диспетчер только решает, берёмся ли мы за этот запрос;
+            // выбор исполнителя — Router (п.8) в ProcessingState, он тоже
+            // не меняет ни состояний, ни контракт.
             if (api.dispatch(*this) == ServerAPI::Route::Process)
                 changeState(&processingState);
             else
@@ -224,6 +232,26 @@ LocalAssistant& Server::getAssistant()
     }
 
     return *assistant;
+}
+
+Executor& Server::getExecutor(Router::Executor kind)
+{
+    switch (kind)
+    {
+        case Router::Executor::None: // фолбэк (п.8)
+        case Router::Executor::LocalAssistant:
+            return localExecutor;
+
+        case Router::Executor::Translator:
+            return translatorExecutor;
+
+        case Router::Executor::RemoteTranslator:
+            return remoteExecutor;
+    }
+
+    // Недостижимо: switch по всем значениям enum. Нужен, чтобы
+    // управление не убежало из не-void функции.
+    return localExecutor;
 }
 
 void Server::preloadModels()

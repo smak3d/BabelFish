@@ -1,6 +1,7 @@
 #include "ProcessingState.h"
 
 #include "Server.h"
+#include "Router.h"
 
 #include <exception>
 #include <iostream>
@@ -58,14 +59,33 @@ void ProcessingState::update()
         return;
     }
 
+    // П.8, связка: запрос -> маршрутизатор -> исполнитель -> LLM.
+    // Семантика п.8: исключение роутера запрос не ломает — остаётся
+    // None, фолбэк в LocalAssistant (сегодняшнее поведение).
+    Router::Executor kind   = Router::Executor::None;
+    Router::Params   params;
+    try
+    {
+        const auto [intent, extracted] =
+            Router::classify(response.transcription);
+        params = extracted;
+        kind   = Router::executorFor(intent, params);
+    }
+    catch (const std::exception&)
+    {
+        // Остаётся None — фолбэк в LocalAssistant.
+    }
+
     try
     {
         response.response =
-            server.getAssistant().prompt(response.transcription);
+            server.getExecutor(kind).execute(response.transcription, params);
     }
     catch (const std::exception& exception)
     {
-        response.status = protocol::ResponseStatus::AssistantError;
+        // Ошибки исполнителя (модель, сеть, удалённый недоступен) —
+        // AssistantError, цикл не рушится.
+        response.status   = protocol::ResponseStatus::AssistantError;
         response.response = exception.what();
     }
 
