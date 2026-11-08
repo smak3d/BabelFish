@@ -7,7 +7,7 @@
 // исполнителем. Две чистые функции, без состояния и без абстракций:
 //
 //     classify(text)              -> {Intent, Params}
-//     executorFor(intent, params) -> Executor
+//     executorFor(intent, params) -> ExecutorType
 //
 // Вход — СЫРОЙ текст после первичной обработки: нормализация входа —
 // работа исполнителя, не роутера (иначе внутри роутера вырастет switch
@@ -34,7 +34,10 @@ namespace Router
         std::string targetLang;   // ISO-639-1, "" — не извлечён
     };
 
-    enum class Executor
+    // ExecutorType, а не Executor: базовый класс исполнителей так и
+    // называется Executor — два одноимённых типа, которые видны вместе
+    // в каждом файле с Server.h, путают при чтении.
+    enum class ExecutorType
     {
         None,             // решения нет -> фолбэк в LocalAssistant
         LocalAssistant,   // ответить на вопрос
@@ -47,11 +50,17 @@ namespace Router
     // запрос: вернёмся, когда правила перестанут справляться.
     std::pair<Intent, Params> classify(const std::string& text);
 
+    // Название языка по ISO-коду — данные для инструкции исполнителя
+    // (см. TranslatorExecutor): одна таблица словаря на роутер и
+    // исполнителей, чтобы названия не расходились с кодами.
+    // Неизвестный код возвращается как есть.
+    std::string languageName(const std::string& code);
+
     // Наивный switch: ru<->en -> локальный, иначе -> удалённый.
     // shortcut: потолок — второй параметр в Params или capability-правило
     // (несколько исполнителей на одно намерение): switch разрастётся в
     // матрицу с приоритетами. Upgrade — таблица (intent, guard) -> executor
     // внутри этих же двух функций; сигнатура не меняется, вызывающие не
     // трогаются. Раньше триггера не рефакторить.
-    Executor executorFor(Intent intent, const Params& params);
+    ExecutorType executorFor(Intent intent, const Params& params);
 }

@@ -45,6 +45,43 @@ namespace
 
         return text;
     }
+
+    // Первый язык в строке начиная с позиции from — по позиции в тексте,
+    // а не по порядку словаря: «на французский с английского» -> fr.
+    std::string firstLanguageIn(const std::string& words, std::size_t from)
+    {
+        std::string found;
+        std::size_t foundAt = std::string::npos;
+
+        for (const auto& language : RouterRules::languages)
+        {
+            const auto at = words.find(language.stem, from);
+            if (at != std::string::npos && at < foundAt)
+            {
+                foundAt = at;
+                found   = language.code;
+            }
+        }
+
+        return found;
+    }
+
+    // Позиция после предлога «на» — там стоит целевой язык («переведи
+    // с английского на французский»). 0 — конструкции нет, тогда поиск
+    // идёт по всей строке. Правило наивное: отрицания и «вместо» не
+    // разбираем (см. известные ограничения в RouterClassify).
+    std::size_t targetAfterNa(const std::string& words)
+    {
+        for (std::size_t at = words.find("на ");
+             at != std::string::npos;
+             at = words.find("на ", at + 1))
+        {
+            if (at == 0 || words[at - 1] == ' ') // отдельное слово, не «сона»
+                return at + 3;                   // после «на «
+        }
+
+        return 0;
+    }
 }
 
 std::pair<Router::Intent, Router::Params>
@@ -53,14 +90,15 @@ Router::classify(const std::string& text)
     const std::string words = lowercase(text);
 
     Params params;
-    for (const auto& [stem, code] : RouterRules::languages)
-    {
-        if (words.find(stem) != std::string::npos)
-        {
-            params.targetLang = code;
-            break; // два языка в одном тексте — берём первый: правило наивное
-        }
-    }
+
+    // Целевой язык — после «на», иначе первое название в строке, иначе
+    // пусто -> executorFor вернёт None (фолбэк, запрос не ломается).
+    const std::size_t region = targetAfterNa(words);
+    std::string target = firstLanguageIn(words, region);
+    if (target.empty() && region != 0)
+        target = firstLanguageIn(words, 0); // «на» есть, языка после него нет
+
+    params.targetLang = std::move(target);
 
     bool wantsTranslation = false;
     for (const char* keyword : RouterRules::keywords)
@@ -76,21 +114,30 @@ Router::classify(const std::string& text)
              params };
 }
 
-Router::Executor
+Router::ExecutorType
 Router::executorFor(Intent intent, const Params& params)
 {
     if (intent == Intent::LocalAssistant)
-        return Executor::LocalAssistant;
+        return ExecutorType::LocalAssistant;
 
     // Язык не извлечён — решения нет: фолбэк, роутер не ломает запрос.
     if (params.targetLang.empty())
-        return Executor::None;
+        return ExecutorType::None;
 
     // Правило наивное: переводчик ru<->en на локальной LLM, остальное —
     // удалённый. Capability-реестр не строим: он появится сам, когда
     // исполнителей станет много и начнут отваливаться.
     if (params.targetLang == "ru" || params.targetLang == "en")
-        return Executor::Translator;
+        return ExecutorType::Translator;
 
-    return Executor::RemoteTranslator;
+    return ExecutorType::RemoteTranslator;
+}
+
+std::string Router::languageName(const std::string& code)
+{
+    for (const auto& language : RouterRules::languages)
+        if (code == language.code)
+            return language.name;
+
+    return code; // неизвестный код — оставляем как есть
 }

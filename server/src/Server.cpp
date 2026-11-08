@@ -234,18 +234,18 @@ LocalAssistant& Server::getAssistant()
     return *assistant;
 }
 
-Executor& Server::getExecutor(Router::Executor kind)
+Executor& Server::getExecutor(Router::ExecutorType kind)
 {
     switch (kind)
     {
-        case Router::Executor::None: // фолбэк (п.8)
-        case Router::Executor::LocalAssistant:
+        case Router::ExecutorType::None: // фолбэк (п.8)
+        case Router::ExecutorType::LocalAssistant:
             return localExecutor;
 
-        case Router::Executor::Translator:
+        case Router::ExecutorType::Translator:
             return translatorExecutor;
 
-        case Router::Executor::RemoteTranslator:
+        case Router::ExecutorType::RemoteTranslator:
             return remoteExecutor;
     }
 

@@ -62,7 +62,7 @@ void ProcessingState::update()
     // П.8, связка: запрос -> маршрутизатор -> исполнитель -> LLM.
     // Семантика п.8: исключение роутера запрос не ломает — остаётся
     // None, фолбэк в LocalAssistant (сегодняшнее поведение).
-    Router::Executor kind   = Router::Executor::None;
+    Router::ExecutorType kind   = Router::ExecutorType::None;
     Router::Params   params;
     try
     {

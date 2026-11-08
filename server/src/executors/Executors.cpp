@@ -28,11 +28,14 @@ std::string TranslatorExecutor::execute(const std::string& text,
                                         const Router::Params& params)
 {
     // Нормализация входа — наша: сырой текст роутера превращаем в
-    // конкретный запрос. params.targetLang приходит из словаря
+    // конкретный запрос. Код в params.targetLang приходит из словаря
     // Router (RouterRules.h), не извне — подстановка безопасна.
+    // Название вместо ISO-кода: «на французский язык» для модели
+    // однозначнее, чем «на язык fr».
     return prompt(
         "Ты профессиональный переводчик. "
-        "Переведи пользовательский текст на язык " + params.targetLang + ". "
+        "Переведи пользовательский текст на "
+        + Router::languageName(params.targetLang) + " язык. "
         "Отвечай только переводом, без пояснений и кавычек.",
         text);
 }

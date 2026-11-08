@@ -107,7 +107,7 @@ class Server
         // в исполнители отсюда, поэтому ленивая загрузка модели
         // сохраняется: модель грузится в первый execute(), а не
         // в конструкторе.
-        Executor& getExecutor(Router::Executor kind);
+        Executor& getExecutor(Router::ExecutorType kind);
 
         protocol::Request& getRequest();
         void setRequest(const protocol::Request& request);

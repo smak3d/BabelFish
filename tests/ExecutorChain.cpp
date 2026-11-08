@@ -60,12 +60,13 @@ static void testTranslationChain()
     const std::string raw = "переведи на английский";
     const auto [intent, params] = Router::classify(raw);
 
-    CHECK(Router::executorFor(intent, params) == Router::Executor::Translator);
+    CHECK(Router::executorFor(intent, params) == Router::ExecutorType::Translator);
 
     const auto answer = executor.execute(raw, params);
 
     CHECK(llm.user == raw); // сырой текст уходит как есть
-    CHECK(llm.system.find(params.targetLang) != std::string::npos);
+    // Инструкция — название языка, а не ISO-код: «на английский язык»
+    CHECK(llm.system.find("английский") != std::string::npos);
     CHECK(llm.system.find("переводчик") != std::string::npos);
     CHECK(answer == llm.reply);
 }
@@ -82,7 +83,7 @@ static void testAnswerChain()
     const auto [intent, params] = Router::classify(raw);
 
     CHECK(Router::executorFor(intent, params)
-          == Router::Executor::LocalAssistant);
+          == Router::ExecutorType::LocalAssistant);
 
     const auto answer = executor.execute(raw, params);
 
@@ -107,7 +108,8 @@ static void testInstructionsDiffer()
     translator.execute("текст", { "fr" });
 
     CHECK(llm.system != answerSystem);
-    CHECK(llm.system.find("fr") != std::string::npos);
+    CHECK(llm.system.find("французский") != std::string::npos);
+    CHECK(llm.system.find("fr") == std::string::npos); // код в инструкцию не утекает
 }
 
 // ---------------------------------------------------------------------------
